@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { formatDate, formatMoney } from "@/lib/format";
 import { downloadInvoicePdf } from "@/lib/pdf";
 
-export const Route = createFileRoute("/_app/invoices")({
+export const Route = createFileRoute("/_app/invoices/")({
   head: () => ({ meta: [{ title: "Invoices — Ledgerly" }] }),
   component: InvoicesPage,
 });

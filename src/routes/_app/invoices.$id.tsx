@@ -42,7 +42,7 @@ function InvoiceEditor() {
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const [newCustOpen, setNewCustOpen] = useState(false);
-  const [newCust, setNewCust] = useState({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "" });
+  const [newCust, setNewCust] = useState({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "", status: "lead" as "lead" | "prospect" | "active" });
   const [creatingCust, setCreatingCust] = useState(false);
 
   const createCustomer = async () => {
@@ -50,14 +50,14 @@ function InvoiceEditor() {
     setCreatingCust(true);
     try {
       const { data, error } = await supabase.from("customers").insert({
-        ...newCust, organization_id: ctx!.org!.id, status: "active",
+        ...newCust, organization_id: ctx!.org!.id,
       } as any).select("id").single();
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["customers-min"] });
       await qc.invalidateQueries({ queryKey: ["customers"] });
       setCustomerId(data.id);
       setNewCustOpen(false);
-      setNewCust({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "" });
+      setNewCust({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "", status: "lead" });
       toast.success("Customer added");
     } catch (e: any) { toast.error(e.message); } finally { setCreatingCust(false); }
   };
@@ -269,9 +269,20 @@ function InvoiceEditor() {
               <Label>Billing address</Label>
               <Textarea rows={2} value={newCust.billing_address} onChange={(e) => setNewCust({ ...newCust, billing_address: e.target.value })} />
             </div>
-            <div className="space-y-1.5 sm:col-span-2">
+            <div className="space-y-1.5">
               <Label>GST / VAT number</Label>
               <Input value={newCust.tax_number} onChange={(e) => setNewCust({ ...newCust, tax_number: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={newCust.status} onValueChange={(v: any) => setNewCust({ ...newCust, status: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lead">Lead</SelectItem>
+                  <SelectItem value="prospect">Prospect</SelectItem>
+                  <SelectItem value="active">Active Client</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

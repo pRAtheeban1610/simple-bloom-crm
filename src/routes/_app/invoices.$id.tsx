@@ -152,7 +152,12 @@ function InvoiceEditor() {
       <Card>
         <CardContent className="grid gap-4 p-6 md:grid-cols-4">
           <div className="space-y-2 md:col-span-2">
-            <Label>Customer</Label>
+            <div className="flex items-center justify-between">
+              <Label>Customer</Label>
+              <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setNewCustOpen(true)}>
+                <UserPlus className="mr-1 h-3.5 w-3.5" /> New customer
+              </Button>
+            </div>
             <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
               <SelectContent>

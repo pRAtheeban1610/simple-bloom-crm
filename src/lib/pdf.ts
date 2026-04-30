@@ -1,8 +1,10 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { formatDate, formatMoney } from "./format";
 
-export function downloadInvoicePdf({ invoice, items, customer, org }: any) {
+export async function downloadInvoicePdf({ invoice, items, customer, org }: any) {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import("jspdf"),
+    import("jspdf-autotable"),
+  ]);
   const doc = new jsPDF();
   const symbol = org?.currency_symbol ?? "$";
   const taxLabel = org?.tax_label ?? "Tax";

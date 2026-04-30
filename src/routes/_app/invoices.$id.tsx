@@ -244,6 +244,42 @@ function InvoiceEditor() {
           <Row k={<span className="text-base font-semibold">Total</span>} v={<span className="text-base font-semibold">{formatMoney(totals.grand_total, symbol)}</span>} />
         </CardContent></Card>
       </div>
+
+      <Dialog open={newCustOpen} onOpenChange={setNewCustOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader><DialogTitle>New customer</DialogTitle></DialogHeader>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Name *</Label>
+              <Input value={newCust.name} onChange={(e) => setNewCust({ ...newCust, name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Company</Label>
+              <Input value={newCust.company_name} onChange={(e) => setNewCust({ ...newCust, company_name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={newCust.email} onChange={(e) => setNewCust({ ...newCust, email: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone</Label>
+              <Input value={newCust.phone} onChange={(e) => setNewCust({ ...newCust, phone: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>Billing address</Label>
+              <Textarea rows={2} value={newCust.billing_address} onChange={(e) => setNewCust({ ...newCust, billing_address: e.target.value })} />
+            </div>
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label>GST / VAT number</Label>
+              <Input value={newCust.tax_number} onChange={(e) => setNewCust({ ...newCust, tax_number: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewCustOpen(false)}>Cancel</Button>
+            <Button onClick={createCustomer} disabled={creatingCust}>{creatingCust ? "Adding…" : "Add customer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

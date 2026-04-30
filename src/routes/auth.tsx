@@ -1,37 +1,23 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { z } from "zod";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 
-const searchSchema = z.object({
-  mode: fallback(z.enum(["signin", "signup"]), "signin").default("signin"),
-});
-
 export const Route = createFileRoute("/auth")({
-  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Sign in — Ledgerly" }] }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { mode } = Route.useSearch();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"signin" | "signup">(mode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [companyName, setCompanyName] = useState("");
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => { setTab(mode); }, [mode]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -43,23 +29,10 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (tab === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: {
-            emailRedirectTo: window.location.origin + "/dashboard",
-            data: { full_name: fullName, company_name: companyName },
-          },
-        });
-        if (error) throw error;
-        toast.success("Welcome! You're all set.");
-        navigate({ to: "/dashboard" });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("Signed in");
-        navigate({ to: "/dashboard" });
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast.success("Signed in");
+      navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message || "Authentication failed");
     } finally {
@@ -86,55 +59,21 @@ function AuthPage() {
       <div className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-border">
           <CardHeader>
-            <CardTitle className="text-2xl">{tab === "signup" ? "Create your workspace" : "Welcome back"}</CardTitle>
-            <CardDescription>
-              {tab === "signup" ? "Free to start. No credit card required." : "Sign in to continue to your dashboard."}
-            </CardDescription>
+            <CardTitle className="text-2xl">Welcome back</CardTitle>
+            <CardDescription>Sign in to continue to your dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs value={tab} onValueChange={(v) => navigate({ to: "/auth", search: { mode: v as any } })}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Sign up</TabsTrigger>
-              </TabsList>
-              <TabsContent value="signin">
-                <form onSubmit={onSubmit} className="mt-4 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="signup">
-                <form onSubmit={onSubmit} className="mt-4 space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Your name</Label>
-                      <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
-                      <Input id="company" required value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email2">Email</Label>
-                    <Input id="email2" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password2">Password</Label>
-                    <Input id="password2" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">At least 8 characters.</p>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</Button>
-                </form>
-              </TabsContent>
-            </Tabs>
+            <form onSubmit={onSubmit} className="mt-2 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
+              <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+            </form>
           </CardContent>
         </Card>
       </div>

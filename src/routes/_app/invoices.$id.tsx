@@ -40,6 +40,27 @@ function InvoiceEditor() {
     { description: "", quantity: 1, unit_price: 0, tax_percent: ctx?.org?.default_tax_percent ?? 0, discount_percent: 0, position: 0 },
   ]);
   const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
+  const [newCustOpen, setNewCustOpen] = useState(false);
+  const [newCust, setNewCust] = useState({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "" });
+  const [creatingCust, setCreatingCust] = useState(false);
+
+  const createCustomer = async () => {
+    if (!newCust.name.trim()) return toast.error("Name is required");
+    setCreatingCust(true);
+    try {
+      const { data, error } = await supabase.from("customers").insert({
+        ...newCust, organization_id: ctx!.org!.id, status: "active",
+      } as any).select("id").single();
+      if (error) throw error;
+      await qc.invalidateQueries({ queryKey: ["customers-min"] });
+      await qc.invalidateQueries({ queryKey: ["customers"] });
+      setCustomerId(data.id);
+      setNewCustOpen(false);
+      setNewCust({ name: "", company_name: "", email: "", phone: "", billing_address: "", tax_number: "" });
+      toast.success("Customer added");
+    } catch (e: any) { toast.error(e.message); } finally { setCreatingCust(false); }
+  };
 
   const { data: customers = [] } = useQuery({
     queryKey: ["customers-min"], enabled: !!ctx?.org,

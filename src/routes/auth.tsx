@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 
@@ -15,6 +16,9 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,7 +29,7 @@ function AuthPage() {
     });
   }, [navigate]);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
@@ -35,6 +39,33 @@ function AuthPage() {
       navigate({ to: "/dashboard" });
     } catch (err: any) {
       toast.error(err.message || "Authentication failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: { full_name: fullName, company_name: companyName },
+        },
+      });
+      if (error) throw error;
+      if (data.session) {
+        toast.success("Account created");
+        navigate({ to: "/dashboard" });
+      } else {
+        toast.success("Account created — check your email to confirm.");
+        setMode("signin");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Sign up failed");
     } finally {
       setBusy(false);
     }
@@ -59,21 +90,54 @@ function AuthPage() {
       <div className="flex items-center justify-center p-6">
         <Card className="w-full max-w-md border-border">
           <CardHeader>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to continue to your dashboard.</CardDescription>
+            <CardTitle className="text-2xl">{mode === "signin" ? "Welcome back" : "Create your account"}</CardTitle>
+            <CardDescription>
+              {mode === "signin" ? "Sign in to continue to your dashboard." : "Start managing customers and invoices."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onSubmit} className="mt-2 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
-            </form>
+            <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign in</TabsTrigger>
+                <TabsTrigger value="signup">Sign up</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="signin">
+                <form onSubmit={onSignIn} className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-in">Email</Label>
+                    <Input id="email-in" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password-in">Password</Label>
+                    <Input id="password-in" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <form onSubmit={onSignUp} className="mt-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full name</Label>
+                    <Input id="name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Company</Label>
+                    <Input id="company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Acme Inc." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email-up">Email</Label>
+                    <Input id="email-up" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password-up">Password</Label>
+                    <Input id="password-up" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

@@ -26,12 +26,13 @@ function Dashboard() {
   const { data } = useQuery({
     queryKey: ["dashboard"],
     enabled: !!ctx?.org,
+    staleTime: 2 * 60_000,
     queryFn: async () => {
-      const [{ count: customerCount }, { data: invoices }] = await Promise.all([
+      const [{ count: customerCount }, { data: invoices }, { data: recentCustomers }] = await Promise.all([
         supabase.from("customers").select("*", { count: "exact", head: true }),
         supabase.from("invoices").select("id, invoice_number, status, grand_total, issue_date, due_date, customer:customers(name, company_name)").order("issue_date", { ascending: false }).limit(100),
+        supabase.from("customers").select("id, name, company_name, status, customer_number, created_at").order("created_at", { ascending: false }).limit(5),
       ]);
-      const { data: recentCustomers } = await supabase.from("customers").select("id, name, company_name, status, customer_number, created_at").order("created_at", { ascending: false }).limit(5);
 
       const all = invoices ?? [];
       const revenue = all.filter(i => i.status === "paid").reduce((s, i) => s + Number(i.grand_total || 0), 0);

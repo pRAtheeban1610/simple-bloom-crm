@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrg } from "@/hooks/useOrg";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LayoutDashboard, Users, FileText, Settings as SettingsIcon, LogOut, Menu, X } from "lucide-react";
+import { Sparkles, LayoutDashboard, Users, FileText, BarChart3, Settings as SettingsIcon, LogOut, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app")({
@@ -19,6 +19,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/customers", label: "Customers", icon: Users },
   { to: "/invoices", label: "Invoices", icon: FileText },
+  { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 

@@ -123,6 +123,11 @@ function InvoiceEditor() {
         const { error: e2 } = await supabase.from("invoice_items").insert(rows);
         if (e2) throw e2;
       }
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["invoices"] }),
+        qc.invalidateQueries({ queryKey: ["invoice", id] }),
+        qc.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]);
       toast.success("Invoice saved");
       navigate({ to: "/invoices" });
     } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }

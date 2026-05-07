@@ -56,10 +56,27 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useAuthCacheReset(queryClient);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );
+}
+
+import { useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+function useAuthCacheReset(queryClient: QueryClient) {
+  const lastUserId = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const uid = session?.user?.id ?? null;
+      if (lastUserId.current !== undefined && lastUserId.current !== uid) {
+        queryClient.clear();
+      }
+      lastUserId.current = uid;
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient]);
 }

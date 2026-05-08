@@ -82,6 +82,40 @@ function Landing() {
         </div>
       </section>
 
+      {/* Products */}
+      <section className="border-t border-border/60">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Our products</h2>
+            <p className="mt-3 text-muted-foreground">Everything you need to run the money side of your business.</p>
+          </div>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { name: "Ledgerly CRM", price: "Free", desc: "Track customers, leads and contacts with instant search and tagging.", features: ["Unlimited contacts", "Lead pipeline", "Activity history"] },
+              { name: "Ledgerly Invoicing", price: "$12/mo", desc: "Send beautiful PDF invoices with automatic numbering, taxes and reminders.", features: ["PDF generation", "Auto numbering", "Payment tracking"], highlight: true },
+              { name: "Ledgerly Insights", price: "$24/mo", desc: "Real-time revenue dashboards, forecasts and customer cohort analysis.", features: ["Revenue charts", "Outstanding A/R", "Custom reports"] },
+            ].map((p) => (
+              <div key={p.name} className={`rounded-xl border p-6 ${p.highlight ? "border-primary bg-card shadow-lg shadow-primary/10" : "border-border bg-card"}`}>
+                {p.highlight && <div className="mb-3 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Most popular</div>}
+                <h3 className="text-lg font-semibold">{p.name}</h3>
+                <div className="mt-2 text-3xl font-bold">{p.price}</div>
+                <p className="mt-3 text-sm text-muted-foreground">{p.desc}</p>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-foreground">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/auth" search={{ mode: "signup" }} className="mt-6 block">
+                  <Button className="w-full" variant={p.highlight ? "default" : "outline"}>Get started</Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="border-t border-border/60 bg-secondary/30">
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-20 sm:grid-cols-2 lg:grid-cols-3">
